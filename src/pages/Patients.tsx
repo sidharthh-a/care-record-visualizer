@@ -4,14 +4,14 @@ import { usePatients } from '../services/api';
 import Layout from '../components/Layout';
 import AddPatientForm from '../components/Patients/AddPatientForm';
 import PatientList from '../components/Patients/PatientList';
-import { toast } from 'sonner';
+import { toast } from "@/components/ui/sonner";
 
 const Patients: React.FC = () => {
   const { patients, loading, error, fetchPatients, addPatient, deletePatient } = usePatients();
   
   useEffect(() => {
     fetchPatients();
-  }, [fetchPatients]);
+  }, []);
   
   const handleAddPatient = async (patientData: any) => {
     const success = await addPatient(patientData);
@@ -26,14 +26,12 @@ const Patients: React.FC = () => {
   };
   
   const handleDeletePatient = async (patientId: number) => {
-    if (window.confirm('Are you sure you want to delete this patient?')) {
-      const success = await deletePatient(patientId);
+    const success = await deletePatient(patientId);
       
-      if (success) {
-        toast.success('Patient deleted successfully');
-      } else {
-        toast.error('Failed to delete patient');
-      }
+    if (success) {
+      toast.success('Patient deleted successfully');
+    } else {
+      toast.error('Failed to delete patient');
     }
   };
   

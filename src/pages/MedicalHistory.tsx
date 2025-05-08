@@ -1,0 +1,118 @@
+
+import React, { useEffect, useState } from 'react';
+import { useMedicalHistories } from '../services/api';
+import Layout from '../components/Layout';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../components/ui/alert-dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
+import { toast } from "@/components/ui/sonner";
+import { Trash2 } from 'lucide-react';
+
+const MedicalHistory: React.FC = () => {
+  const { medicalHistories, loading, error, fetchMedicalHistories, deleteMedicalHistory } = useMedicalHistories();
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  
+  useEffect(() => {
+    fetchMedicalHistories();
+  }, []);
+  
+  const handleDeleteMedicalHistory = async () => {
+    if (deleteId === null) return;
+    
+    const success = await deleteMedicalHistory(deleteId);
+    
+    if (success) {
+      toast.success('Medical history deleted successfully');
+    } else {
+      toast.error('Failed to delete medical history');
+    }
+    
+    setDeleteId(null);
+  };
+  
+  return (
+    <Layout>
+      <div className="mb-8">
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">Medical History</h1>
+        <p className="text-gray-500 mt-1">View and manage patients' medical history</p>
+      </div>
+      
+      <div className="space-y-6">
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="text-lg">Loading medical histories...</div>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <div className="text-lg text-red-500">Error: {error}</div>
+            <button 
+              onClick={fetchMedicalHistories}
+              className="mt-4 px-4 py-2 bg-medical-blue text-white rounded-md"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Patient</TableHead>
+                  <TableHead>Medical Conditions</TableHead>
+                  <TableHead>Allergies</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {medicalHistories.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-6">
+                      No medical histories found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  medicalHistories.map((history) => (
+                    <TableRow key={history.medical_history_id}>
+                      <TableCell>{history.medical_history_id}</TableCell>
+                      <TableCell>{history.patientName}</TableCell>
+                      <TableCell>{history.medical_conditions}</TableCell>
+                      <TableCell>{history.allergies}</TableCell>
+                      <TableCell className="text-right">
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button
+                              onClick={() => setDeleteId(history.medical_history_id)}
+                              className="text-red-600 hover:text-red-800 p-1"
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete this medical history record? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel onClick={() => setDeleteId(null)}>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={handleDeleteMedicalHistory} className="bg-red-600 hover:bg-red-700">
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </div>
+    </Layout>
+  );
+};
+
+export default MedicalHistory;

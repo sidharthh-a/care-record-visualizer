@@ -307,6 +307,340 @@ export function useAppointments() {
   return { appointments, loading, error, fetchAppointments, addAppointment, deleteAppointment };
 }
 
+export function useBillings() {
+  const [billings, setBillings] = useState<Billing[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const fetchBillings = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const { data, error } = await supabase
+        .from('billing')
+        .select('*, patient:patient_id(name)');
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error fetching billings:', error);
+      } else {
+        const formattedBillings = data.map(billing => ({
+          billing_id: billing.billing_id,
+          patient_id: billing.patient_id,
+          amount: billing.amount,
+          payment_date: billing.payment_date,
+          patientName: billing.patient?.name || 'Unknown'
+        }));
+        
+        setBillings(formattedBillings);
+      }
+    } catch (err) {
+      setError('Failed to fetch billings');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const addBilling = async (billing: Billing) => {
+    try {
+      const { error } = await supabase.from('billing').insert({
+        patient_id: billing.patient_id,
+        amount: billing.amount,
+        payment_date: billing.payment_date
+      });
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error adding billing:', error);
+        return false;
+      } else {
+        await fetchBillings();
+        return true;
+      }
+    } catch (err) {
+      setError('Failed to add billing');
+      console.error(err);
+      return false;
+    }
+  };
+  
+  const deleteBilling = async (billingId: number) => {
+    try {
+      const { error } = await supabase.from('billing').delete().eq('billing_id', billingId);
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error deleting billing:', error);
+        return false;
+      } else {
+        await fetchBillings();
+        return true;
+      }
+    } catch (err) {
+      setError('Failed to delete billing');
+      console.error(err);
+      return false;
+    }
+  };
+  
+  return { billings, loading, error, fetchBillings, addBilling, deleteBilling };
+}
+
+export function useMedicalHistories() {
+  const [medicalHistories, setMedicalHistories] = useState<MedicalHistory[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const fetchMedicalHistories = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const { data, error } = await supabase
+        .from('medical_history')
+        .select('*, patient:patient_id(name)');
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error fetching medical histories:', error);
+      } else {
+        const formattedHistories = data.map(history => ({
+          medical_history_id: history.medical_history_id,
+          patient_id: history.patient_id,
+          medical_conditions: history.medical_conditions,
+          allergies: history.allergies,
+          surgeries: history.surgeries,
+          treatments: history.treatments,
+          patientName: history.patient?.name || 'Unknown'
+        }));
+        
+        setMedicalHistories(formattedHistories);
+      }
+    } catch (err) {
+      setError('Failed to fetch medical histories');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const addMedicalHistory = async (history: MedicalHistory) => {
+    try {
+      const { error } = await supabase.from('medical_history').insert({
+        patient_id: history.patient_id,
+        medical_conditions: history.medical_conditions,
+        allergies: history.allergies,
+        surgeries: history.surgeries,
+        treatments: history.treatments
+      });
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error adding medical history:', error);
+        return false;
+      } else {
+        await fetchMedicalHistories();
+        return true;
+      }
+    } catch (err) {
+      setError('Failed to add medical history');
+      console.error(err);
+      return false;
+    }
+  };
+  
+  const deleteMedicalHistory = async (historyId: number) => {
+    try {
+      const { error } = await supabase.from('medical_history').delete().eq('medical_history_id', historyId);
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error deleting medical history:', error);
+        return false;
+      } else {
+        await fetchMedicalHistories();
+        return true;
+      }
+    } catch (err) {
+      setError('Failed to delete medical history');
+      console.error(err);
+      return false;
+    }
+  };
+  
+  return { medicalHistories, loading, error, fetchMedicalHistories, addMedicalHistory, deleteMedicalHistory };
+}
+
+export function useInsurances() {
+  const [insurances, setInsurances] = useState<Insurance[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const fetchInsurances = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const { data, error } = await supabase
+        .from('insurance')
+        .select('*, patient:patient_id(name)');
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error fetching insurances:', error);
+      } else {
+        const formattedInsurances = data.map(insurance => ({
+          insurance_id: insurance.insurance_id,
+          patient_id: insurance.patient_id,
+          provider_name: insurance.provider_name,
+          policy_number: insurance.policy_number,
+          coverage_details: insurance.coverage_details,
+          patientName: insurance.patient?.name || 'Unknown'
+        }));
+        
+        setInsurances(formattedInsurances);
+      }
+    } catch (err) {
+      setError('Failed to fetch insurances');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const addInsurance = async (insurance: Insurance) => {
+    try {
+      const { error } = await supabase.from('insurance').insert({
+        patient_id: insurance.patient_id,
+        provider_name: insurance.provider_name,
+        policy_number: insurance.policy_number,
+        coverage_details: insurance.coverage_details
+      });
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error adding insurance:', error);
+        return false;
+      } else {
+        await fetchInsurances();
+        return true;
+      }
+    } catch (err) {
+      setError('Failed to add insurance');
+      console.error(err);
+      return false;
+    }
+  };
+  
+  const deleteInsurance = async (insuranceId: number) => {
+    try {
+      const { error } = await supabase.from('insurance').delete().eq('insurance_id', insuranceId);
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error deleting insurance:', error);
+        return false;
+      } else {
+        await fetchInsurances();
+        return true;
+      }
+    } catch (err) {
+      setError('Failed to delete insurance');
+      console.error(err);
+      return false;
+    }
+  };
+  
+  return { insurances, loading, error, fetchInsurances, addInsurance, deleteInsurance };
+}
+
+export function useMedications() {
+  const [medications, setMedications] = useState<Medication[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const fetchMedications = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const { data, error } = await supabase
+        .from('medication')
+        .select('*, patient:patient_id(name)');
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error fetching medications:', error);
+      } else {
+        const formattedMedications = data.map(medication => ({
+          medication_id: medication.medication_id,
+          patient_id: medication.patient_id,
+          name: medication.name,
+          dosage: medication.dosage,
+          frequency: medication.frequency,
+          duration: medication.duration,
+          patientName: medication.patient?.name || 'Unknown'
+        }));
+        
+        setMedications(formattedMedications);
+      }
+    } catch (err) {
+      setError('Failed to fetch medications');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const addMedication = async (medication: Medication) => {
+    try {
+      const { error } = await supabase.from('medication').insert({
+        patient_id: medication.patient_id,
+        name: medication.name,
+        dosage: medication.dosage,
+        frequency: medication.frequency,
+        duration: medication.duration
+      });
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error adding medication:', error);
+        return false;
+      } else {
+        await fetchMedications();
+        return true;
+      }
+    } catch (err) {
+      setError('Failed to add medication');
+      console.error(err);
+      return false;
+    }
+  };
+  
+  const deleteMedication = async (medicationId: number) => {
+    try {
+      const { error } = await supabase.from('medication').delete().eq('medication_id', medicationId);
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error deleting medication:', error);
+        return false;
+      } else {
+        await fetchMedications();
+        return true;
+      }
+    } catch (err) {
+      setError('Failed to delete medication');
+      console.error(err);
+      return false;
+    }
+  };
+  
+  return { medications, loading, error, fetchMedications, addMedication, deleteMedication };
+}
+
 export function useDashboardStats() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(false);

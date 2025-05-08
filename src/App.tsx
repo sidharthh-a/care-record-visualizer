@@ -9,6 +9,10 @@ import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
 import Doctors from "./pages/Doctors";
 import Appointments from "./pages/Appointments";
+import Billing from "./pages/Billing";
+import MedicalHistory from "./pages/MedicalHistory";
+import Insurance from "./pages/Insurance";
+import Medications from "./pages/Medications";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import NotFound from "./pages/NotFound";
 
@@ -26,30 +30,10 @@ const App = () => (
           <Route path="/patients" element={<Patients />} />
           <Route path="/doctors" element={<Doctors />} />
           <Route path="/appointments" element={<Appointments />} />
-          <Route path="/billing" element={
-            <PlaceholderPage 
-              title="Billing Management" 
-              description="Manage patient billing records and payments" 
-            />
-          } />
-          <Route path="/medical-history" element={
-            <PlaceholderPage 
-              title="Medical History" 
-              description="View and manage patients' medical history" 
-            />
-          } />
-          <Route path="/insurance" element={
-            <PlaceholderPage 
-              title="Insurance Management" 
-              description="Manage patient insurance policies and claims" 
-            />
-          } />
-          <Route path="/medications" element={
-            <PlaceholderPage 
-              title="Medications" 
-              description="Manage patient medications and prescriptions" 
-            />
-          } />
+          <Route path="/billing" element={<Billing />} />
+          <Route path="/medical-history" element={<MedicalHistory />} />
+          <Route path="/insurance" element={<Insurance />} />
+          <Route path="/medications" element={<Medications />} />
           <Route path="/diagnostic-tests" element={
             <PlaceholderPage 
               title="Diagnostic Tests" 

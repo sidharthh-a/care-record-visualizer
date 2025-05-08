@@ -4,7 +4,7 @@ import { useAppointments, usePatients, useDoctors } from '../services/api';
 import Layout from '../components/Layout';
 import AddAppointmentForm from '../components/Appointments/AddAppointmentForm';
 import AppointmentList from '../components/Appointments/AppointmentList';
-import { toast } from 'sonner';
+import { toast } from "@/components/ui/sonner";
 
 const Appointments: React.FC = () => {
   const { appointments, loading: loadingAppointments, error: appointmentsError, fetchAppointments, addAppointment, deleteAppointment } = useAppointments();
@@ -15,7 +15,7 @@ const Appointments: React.FC = () => {
     fetchAppointments();
     fetchPatients();
     fetchDoctors();
-  }, [fetchAppointments, fetchPatients, fetchDoctors]);
+  }, []);
   
   const handleAddAppointment = async (appointmentData: any) => {
     const success = await addAppointment(appointmentData);
@@ -30,14 +30,12 @@ const Appointments: React.FC = () => {
   };
   
   const handleDeleteAppointment = async (appointmentId: number) => {
-    if (window.confirm('Are you sure you want to delete this appointment?')) {
-      const success = await deleteAppointment(appointmentId);
+    const success = await deleteAppointment(appointmentId);
       
-      if (success) {
-        toast.success('Appointment deleted successfully');
-      } else {
-        toast.error('Failed to delete appointment');
-      }
+    if (success) {
+      toast.success('Appointment deleted successfully');
+    } else {
+      toast.error('Failed to delete appointment');
     }
   };
   

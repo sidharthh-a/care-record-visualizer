@@ -88,80 +88,6 @@ async function getDashboardStats(): Promise<ApiResponse<any>> {
   }
 }
 
-// Generic function to fetch data from Supabase
-async function fetchData<T>(tableName: string): Promise<ApiResponse<T[]>> {
-  try {
-    const { data, error } = await supabase
-      .from(tableName)
-      .select('*');
-    
-    if (error) {
-      console.error(`Error fetching ${tableName}:`, error);
-      return { error: `Failed to fetch ${tableName}: ${error.message}` };
-    }
-    
-    return { data: data as T[] };
-  } catch (error) {
-    console.error(`Error in fetchData for ${tableName}:`, error);
-    return { error: `An unexpected error occurred while fetching ${tableName}` };
-  }
-}
-
-// Generic function to add data to Supabase
-async function addData<T>(tableName: string, data: T): Promise<ApiResponse<T>> {
-  try {
-    const { data: insertedData, error } = await supabase
-      .from(tableName)
-      .insert(data)
-      .select()
-      .single();
-    
-    if (error) {
-      console.error(`Error adding to ${tableName}:`, error);
-      return { error: `Failed to add to ${tableName}: ${error.message}` };
-    }
-    
-    return { data: insertedData as T };
-  } catch (error) {
-    console.error(`Error in addData for ${tableName}:`, error);
-    return { error: `An unexpected error occurred while adding to ${tableName}` };
-  }
-}
-
-// Generic function to delete data from Supabase
-async function deleteData(tableName: string, id: number): Promise<ApiResponse<null>> {
-  try {
-    // Determine the ID column name based on the table
-    const idColumnMap: { [key: string]: string } = {
-      'patients': 'patient_id',
-      'doctors': 'doctor_id',
-      'appointments': 'appointment_id',
-      'billings': 'billing_id',
-      'diagnostic_test_results': 'diagnostic_test_result_id',
-      'insurances': 'insurance_id',
-      'medical_histories': 'medical_history_id',
-      'medications': 'medication_id'
-    };
-    
-    const idColumn = idColumnMap[tableName] || `${tableName.slice(0, -1)}_id`;
-    
-    const { error } = await supabase
-      .from(tableName)
-      .delete()
-      .eq(idColumn, id);
-    
-    if (error) {
-      console.error(`Error deleting from ${tableName}:`, error);
-      return { error: `Failed to delete from ${tableName}: ${error.message}` };
-    }
-    
-    return { data: null, message: `Successfully deleted from ${tableName}` };
-  } catch (error) {
-    console.error(`Error in deleteData for ${tableName}:`, error);
-    return { error: `An unexpected error occurred while deleting from ${tableName}` };
-  }
-}
-
 // Hooks for data operations
 export function usePatients() {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -240,11 +166,13 @@ export function useDoctors() {
     setError(null);
     
     try {
-      const response = await fetchData<Doctor[]>('doctors');
-      if (response.error) {
-        setError(response.error);
-      } else if (response.data) {
-        setDoctors(response.data);
+      const { data, error } = await supabase.from('doctor').select('*');
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error fetching doctors:', error);
+      } else {
+        setDoctors(data as Doctor[]);
       }
     } catch (err) {
       setError('Failed to fetch doctors');
@@ -256,9 +184,11 @@ export function useDoctors() {
   
   const addDoctor = async (doctor: Doctor) => {
     try {
-      const response = await addData<Doctor>('doctors', doctor);
-      if (response.error) {
-        setError(response.error);
+      const { error } = await supabase.from('doctor').insert(doctor);
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error adding doctor:', error);
         return false;
       } else {
         await fetchDoctors();
@@ -273,9 +203,11 @@ export function useDoctors() {
   
   const deleteDoctor = async (doctorId: number) => {
     try {
-      const response = await deleteData('doctors', doctorId);
-      if (response.error) {
-        setError(response.error);
+      const { error } = await supabase.from('doctor').delete().eq('doctor_id', doctorId);
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error deleting doctor:', error);
         return false;
       } else {
         await fetchDoctors();
@@ -301,11 +233,25 @@ export function useAppointments() {
     setError(null);
     
     try {
-      const response = await fetchData<Appointment[]>('appointments');
-      if (response.error) {
-        setError(response.error);
-      } else if (response.data) {
-        setAppointments(response.data);
+      const { data, error } = await supabase
+        .from('appointment')
+        .select('*, patient:patient_id(name), doctor:doctor_id(name)');
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error fetching appointments:', error);
+      } else {
+        const formattedAppointments = data.map(appt => ({
+          appointment_id: appt.appointment_id,
+          patient_id: appt.patient_id,
+          doctor_id: appt.doctor_id,
+          appointment_date: appt.appointment_date,
+          reason: appt.reason,
+          patientName: appt.patient?.name || 'Unknown',
+          doctorName: appt.doctor?.name || 'Unknown'
+        }));
+        
+        setAppointments(formattedAppointments);
       }
     } catch (err) {
       setError('Failed to fetch appointments');
@@ -317,9 +263,16 @@ export function useAppointments() {
   
   const addAppointment = async (appointment: Appointment) => {
     try {
-      const response = await addData<Appointment>('appointments', appointment);
-      if (response.error) {
-        setError(response.error);
+      const { error } = await supabase.from('appointment').insert({
+        patient_id: appointment.patient_id,
+        doctor_id: appointment.doctor_id,
+        appointment_date: appointment.appointment_date,
+        reason: appointment.reason
+      });
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error adding appointment:', error);
         return false;
       } else {
         await fetchAppointments();
@@ -334,9 +287,11 @@ export function useAppointments() {
   
   const deleteAppointment = async (appointmentId: number) => {
     try {
-      const response = await deleteData('appointments', appointmentId);
-      if (response.error) {
-        setError(response.error);
+      const { error } = await supabase.from('appointment').delete().eq('appointment_id', appointmentId);
+      
+      if (error) {
+        setError(error.message);
+        console.error('Error deleting appointment:', error);
         return false;
       } else {
         await fetchAppointments();

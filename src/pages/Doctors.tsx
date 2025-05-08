@@ -4,14 +4,14 @@ import { useDoctors } from '../services/api';
 import Layout from '../components/Layout';
 import AddDoctorForm from '../components/Doctors/AddDoctorForm';
 import DoctorList from '../components/Doctors/DoctorList';
-import { toast } from 'sonner';
+import { toast } from "@/components/ui/sonner";
 
 const Doctors: React.FC = () => {
   const { doctors, loading, error, fetchDoctors, addDoctor, deleteDoctor } = useDoctors();
   
   useEffect(() => {
     fetchDoctors();
-  }, [fetchDoctors]);
+  }, []);
   
   const handleAddDoctor = async (doctorData: any) => {
     const success = await addDoctor(doctorData);
@@ -26,14 +26,12 @@ const Doctors: React.FC = () => {
   };
   
   const handleDeleteDoctor = async (doctorId: number) => {
-    if (window.confirm('Are you sure you want to delete this doctor?')) {
-      const success = await deleteDoctor(doctorId);
+    const success = await deleteDoctor(doctorId);
       
-      if (success) {
-        toast.success('Doctor deleted successfully');
-      } else {
-        toast.error('Failed to delete doctor');
-      }
+    if (success) {
+      toast.success('Doctor deleted successfully');
+    } else {
+      toast.error('Failed to delete doctor');
     }
   };
   

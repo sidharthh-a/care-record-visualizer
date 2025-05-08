@@ -6,13 +6,22 @@ import StatCard from '../components/Dashboard/StatCard';
 import PatientTable from '../components/Dashboard/PatientTable';
 import AppointmentTable from '../components/Dashboard/AppointmentTable';
 import { User, Users, Calendar, Clock } from 'lucide-react';
+import { toast } from "@/components/ui/sonner";
 
 const Dashboard: React.FC = () => {
   const { stats, loading, error, fetchStats } = useDashboardStats();
   
   useEffect(() => {
     fetchStats();
-  }, [fetchStats]);
+  }, []);
+  
+  useEffect(() => {
+    if (error) {
+      toast.error("Failed to load dashboard data", {
+        description: error
+      });
+    }
+  }, [error]);
   
   return (
     <Layout>

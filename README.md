@@ -126,15 +126,7 @@ This project is licensed under the MIT License.
 
 ## 👨‍💻 Authors
 
-* Your Name
-* Team Members
-
----
-
-## 📬 Contact
-
-For queries or collaboration:
-
-📧 [your-email@example.com](mailto:your-email@example.com)
+* Jei Srinivas
+* Sidharth A
 
 ---
